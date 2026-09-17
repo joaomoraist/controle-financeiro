@@ -1,0 +1,8 @@
+package src.main.java.com.joaomorais.controle_financeiro.exception;
+
+public class ExpenseNotFoundException extends RuntimeException {
+
+    public ExpenseNotFoundException(String message) {
+        super(message);
+    }
+}

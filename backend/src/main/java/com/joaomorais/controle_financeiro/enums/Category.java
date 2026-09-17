@@ -1,4 +1,11 @@
 package src.main.java.com.joaomorais.controle_financeiro.enums;
 
-public class Category {
+public enum Category {
+    ALIMENTACAO,
+    TRANSPORTE,
+    MORADIA,
+    LAZER,
+    SAUDE,
+    EDUCACAO,
+    OUTROS
 }
