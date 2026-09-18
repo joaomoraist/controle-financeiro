@@ -5,6 +5,7 @@ import src.main.java.com.joaomorais.controle_financeiro.dto.ExpenseRequest;
 import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
 import src.main.java.com.joaomorais.controle_financeiro.repository.ExpenseRepository;
 import src.main.java.com.joaomorais.controle_financeiro.exception.ExpenseNotFoundException;
+import java.time.LocalDate;
 
 import java.util.List;
 
@@ -24,6 +25,11 @@ public class ExpenseService {
     public List<Expense> findAll(){
         return expenseRepository.findAll();
     }
+    // Buscar por data
+    public List<Expense> findByPeriod(LocalDate startDate, LocalDate endDate){
+        return expenseRepository.findByDateBetween(startDate, endDate);
+    }
+
     // Buscar por ID
     public Expense findById(Long id) {
         return expenseRepository.findById(id)

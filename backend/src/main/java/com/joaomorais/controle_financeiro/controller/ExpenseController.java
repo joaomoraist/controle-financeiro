@@ -7,6 +7,7 @@ import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
 import src.main.java.com.joaomorais.controle_financeiro.service.ExpenseService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -33,7 +34,12 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public List<Expense> findAll(){
+    public List<Expense> findAll(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate){
+        if (startDate != null && endDate != null){
+            return expenseService.findByPeriod(startDate, endDate);
+        }
         return expenseService.findAll();
     }
 
