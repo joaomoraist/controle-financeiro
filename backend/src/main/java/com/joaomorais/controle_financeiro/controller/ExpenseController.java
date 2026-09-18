@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import src.main.java.com.joaomorais.controle_financeiro.dto.ExpenseRequest;
 import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
+import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
+import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
 import src.main.java.com.joaomorais.controle_financeiro.service.ExpenseService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -36,11 +38,15 @@ public class ExpenseController {
     @GetMapping
     public List<Expense> findAll(
             @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate){
-        if (startDate != null && endDate != null){
-            return expenseService.findByPeriod(startDate, endDate);
-        }
-        return expenseService.findAll();
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false)Classification classification){
+        return expenseService.findByFilters(
+                startDate,
+                endDate,
+                category,
+                classification
+        );
     }
 
     @GetMapping("/{id}")
@@ -50,6 +56,7 @@ public class ExpenseController {
 
     @PutMapping("/{id}")
     public Expense update(
+
             @PathVariable Long id,
             @Valid @RequestBody ExpenseRequest request){
         return expenseService.update(id, request);

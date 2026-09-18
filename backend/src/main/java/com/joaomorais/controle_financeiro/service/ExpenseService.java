@@ -3,9 +3,12 @@ package src.main.java.com.joaomorais.controle_financeiro.service;
 import org.springframework.stereotype.Service;
 import src.main.java.com.joaomorais.controle_financeiro.dto.ExpenseRequest;
 import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
+import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
 import src.main.java.com.joaomorais.controle_financeiro.repository.ExpenseRepository;
 import src.main.java.com.joaomorais.controle_financeiro.exception.ExpenseNotFoundException;
 import java.time.LocalDate;
+import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
+import src.main.java.com.joaomorais.controle_financeiro.specification.ExpenseSpecification;
 
 import java.util.List;
 
@@ -25,9 +28,22 @@ public class ExpenseService {
     public List<Expense> findAll(){
         return expenseRepository.findAll();
     }
-    // Buscar por data
-    public List<Expense> findByPeriod(LocalDate startDate, LocalDate endDate){
-        return expenseRepository.findByDateBetween(startDate, endDate);
+
+    // Buscar por filtros
+    public List<Expense> findByFilters(
+            LocalDate startDate,
+            LocalDate endDate,
+            Category category,
+            Classification classification) {
+
+        return expenseRepository.findAll(
+                ExpenseSpecification.filter(
+                        startDate,
+                        endDate,
+                        category,
+                        classification
+                )
+        );
     }
 
     // Buscar por ID
