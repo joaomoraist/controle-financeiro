@@ -13,4 +13,10 @@ public class GlobalExceptionHandler {
     public String handleExpenseNotFound(ExpenseNotFoundException exception) {
         return exception.getMessage();
     }
+
+    @ExceptionHandler(InvalidReportPeriodException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleInvalidReportPeriod(InvalidReportPeriodException exception){
+        return exception.getMessage();
+    }
 }
