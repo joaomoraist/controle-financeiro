@@ -1,12 +1,12 @@
-package src.main.java.com.joaomorais.controle_financeiro.service;
+package com.joaomorais.controle_financeiro.service;
 
 import org.springframework.stereotype.Service;
-import src.main.java.com.joaomorais.controle_financeiro.controller.ReportController;
-import src.main.java.com.joaomorais.controle_financeiro.dto.MonthlyReportResponse;
-import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
-import src.main.java.com.joaomorais.controle_financeiro.exception.InvalidReportPeriodException;
-import src.main.java.com.joaomorais.controle_financeiro.repository.ExpenseRepository;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
+import com.joaomorais.controle_financeiro.controller.ReportController;
+import com.joaomorais.controle_financeiro.dto.MonthlyReportResponse;
+import com.joaomorais.controle_financeiro.entity.Expense;
+import com.joaomorais.controle_financeiro.exception.InvalidReportPeriodException;
+import com.joaomorais.controle_financeiro.repository.ExpenseRepository;
+import com.joaomorais.controle_financeiro.enums.Classification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,14 +23,20 @@ public class ReportService {
         this.expenseRepository = expenseRepository;
     }
 
-    public MonthlyReportResponse monthly(int year, int month){
-        if (month <1 || month > 12){
+    public List<Expense> findMonthlyExpenses(int year, int month) {
+
+        if (month < 1 || month > 12) {
             throw new InvalidReportPeriodException("O mês deve estar entre 1 e 12");
         }
+
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        List<Expense> expenses = expenseRepository.findByDateBetween (startDate, endDate);
+        return expenseRepository.findByDateBetween(startDate, endDate);
+    }
+
+    public MonthlyReportResponse monthly(int year, int month){
+        List<Expense> expenses = findMonthlyExpenses(year, month);
 
         BigDecimal total = expenses.stream()
                 .map(Expense::getValue)

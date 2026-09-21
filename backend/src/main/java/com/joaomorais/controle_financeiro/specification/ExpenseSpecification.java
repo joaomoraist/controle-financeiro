@@ -1,10 +1,10 @@
-package src.main.java.com.joaomorais.controle_financeiro.specification;
+package com.joaomorais.controle_financeiro.specification;
 
 import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
-import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
+import com.joaomorais.controle_financeiro.entity.Expense;
+import com.joaomorais.controle_financeiro.enums.Category;
+import com.joaomorais.controle_financeiro.enums.Classification;
 
 public class ExpenseSpecification {
 

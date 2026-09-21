@@ -1,7 +1,7 @@
-package src.main.java.com.joaomorais.controle_financeiro.dto;
+package com.joaomorais.controle_financeiro.dto;
 
-import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
+import com.joaomorais.controle_financeiro.enums.Category;
+import com.joaomorais.controle_financeiro.enums.Classification;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

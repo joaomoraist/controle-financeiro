@@ -1,8 +1,8 @@
-package src.main.java.com.joaomorais.controle_financeiro.entity;
+package com.joaomorais.controle_financeiro.entity;
 
 import jakarta.persistence.*;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
+import com.joaomorais.controle_financeiro.enums.Category;
+import com.joaomorais.controle_financeiro.enums.Classification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

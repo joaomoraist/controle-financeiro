@@ -1,4 +1,4 @@
-package src.main.java.com.joaomorais.controle_financeiro;
+package com.joaomorais.controle_financeiro;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

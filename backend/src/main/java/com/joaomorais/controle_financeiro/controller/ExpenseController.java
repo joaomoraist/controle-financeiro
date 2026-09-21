@@ -1,15 +1,16 @@
-package src.main.java.com.joaomorais.controle_financeiro.controller;
+package com.joaomorais.controle_financeiro.controller;
 
+import com.joaomorais.controle_financeiro.dto.ExpenseRequest;
+import com.joaomorais.controle_financeiro.entity.Expense;
+import com.joaomorais.controle_financeiro.enums.Category;
+import com.joaomorais.controle_financeiro.enums.Classification;
+import com.joaomorais.controle_financeiro.service.ExpenseService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import src.main.java.com.joaomorais.controle_financeiro.dto.ExpenseRequest;
-import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
-import src.main.java.com.joaomorais.controle_financeiro.service.ExpenseService;
-import jakarta.validation.Valid;
-import java.util.List;
+
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -17,13 +18,13 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
 
-    public ExpenseController (ExpenseService expenseService){
+    public ExpenseController(ExpenseService expenseService) {
         this.expenseService = expenseService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Expense create(@Valid @RequestBody ExpenseRequest request){
+    public Expense create(@Valid @RequestBody ExpenseRequest request) {
         Expense expense = new Expense();
 
         expense.setDate(request.getDate());
@@ -40,7 +41,8 @@ public class ExpenseController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) Category category,
-            @RequestParam(required = false)Classification classification){
+            @RequestParam(required = false) Classification classification) {
+
         return expenseService.findByFilters(
                 startDate,
                 endDate,
@@ -56,15 +58,15 @@ public class ExpenseController {
 
     @PutMapping("/{id}")
     public Expense update(
-
             @PathVariable Long id,
-            @Valid @RequestBody ExpenseRequest request){
+            @Valid @RequestBody ExpenseRequest request) {
+
         return expenseService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id){
+    public void delete(@PathVariable Long id) {
         expenseService.delete(id);
     }
 }

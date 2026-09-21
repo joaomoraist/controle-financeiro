@@ -1,4 +1,4 @@
-package src.main.java.com.joaomorais.controle_financeiro.dto;
+package com.joaomorais.controle_financeiro.dto;
 
 import java.math.BigDecimal;
 import java.util.Map;

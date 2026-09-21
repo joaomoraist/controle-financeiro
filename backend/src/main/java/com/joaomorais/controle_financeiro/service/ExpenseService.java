@@ -1,14 +1,14 @@
-package src.main.java.com.joaomorais.controle_financeiro.service;
+package com.joaomorais.controle_financeiro.service;
 
 import org.springframework.stereotype.Service;
-import src.main.java.com.joaomorais.controle_financeiro.dto.ExpenseRequest;
-import src.main.java.com.joaomorais.controle_financeiro.entity.Expense;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Classification;
-import src.main.java.com.joaomorais.controle_financeiro.repository.ExpenseRepository;
-import src.main.java.com.joaomorais.controle_financeiro.exception.ExpenseNotFoundException;
+import com.joaomorais.controle_financeiro.dto.ExpenseRequest;
+import com.joaomorais.controle_financeiro.entity.Expense;
+import com.joaomorais.controle_financeiro.enums.Classification;
+import com.joaomorais.controle_financeiro.repository.ExpenseRepository;
+import com.joaomorais.controle_financeiro.exception.ExpenseNotFoundException;
 import java.time.LocalDate;
-import src.main.java.com.joaomorais.controle_financeiro.enums.Category;
-import src.main.java.com.joaomorais.controle_financeiro.specification.ExpenseSpecification;
+import com.joaomorais.controle_financeiro.enums.Category;
+import com.joaomorais.controle_financeiro.specification.ExpenseSpecification;
 
 import java.util.List;
 

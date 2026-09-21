@@ -1,4 +1,4 @@
-package src.main.java.com.joaomorais.controle_financeiro.exception;
+package com.joaomorais.controle_financeiro.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

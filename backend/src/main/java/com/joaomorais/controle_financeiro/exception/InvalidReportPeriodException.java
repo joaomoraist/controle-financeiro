@@ -1,4 +1,4 @@
-package src.main.java.com.joaomorais.controle_financeiro.exception;
+package com.joaomorais.controle_financeiro.exception;
 
 public class InvalidReportPeriodException extends RuntimeException {
 

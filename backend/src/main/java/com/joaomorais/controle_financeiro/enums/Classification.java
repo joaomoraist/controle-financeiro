@@ -1,4 +1,4 @@
-package src.main.java.com.joaomorais.controle_financeiro.enums;
+package com.joaomorais.controle_financeiro.enums;
 
 public enum Classification {
     NECESSARIO,
