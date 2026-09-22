@@ -1,13 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+type Expense = {
+  id: number
+  date: string
+  description: string
+  value: number
+  category: string
+  classification: string
+}
 
 function Expenses() {
+  const [expenses, setExpenses] = useState<Expense[]>([])
   const [showForm, setShowForm] = useState(false)
+  
 
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
   const [value, setValue] = useState('')
   const [category, setCategory] = useState('')
   const [classification, setClassification] = useState('')
+
+  const total = expenses.reduce((sum, expense) => sum + expense.value, 0)
+
+  useEffect(() => {
+  fetch('http://localhost:8080/api/expenses')
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Despesas recebidas:', data)
+      setExpenses(data)
+    })
+}, [])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -36,6 +58,12 @@ function Expenses() {
     const savedExpense = await response.json()
 
     console.log('Despesa salva:', savedExpense)
+
+        setExpenses((currentExpenses) => [
+      ...currentExpenses,
+      savedExpense,
+    ])
+
 
     setShowForm(false)
     }
@@ -193,109 +221,42 @@ function Expenses() {
         <div className="panel-header">
           <div>
             <h2>Setembro 2026</h2>
-            <p>15 despesas encontradas</p>
+            <p>{expenses.length} despesas encontradas</p>
           </div>
 
           <strong className="month-total">
-            R$ 1.250,00
+            {total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}
           </strong>
         </div>
 
         <div className="expense-list">
-          <div className="expense">
-            <div className="expense-icon">🍔</div>
+          {expenses.map((expense) => (
+            <div className="expense" key={expense.id}>
+              <div className="expense-icon">
+                💰
+              </div>
 
-            <div className="expense-info">
-              <strong>Almoço</strong>
-              <span>22 de setembro · Alimentação</span>
+              <div className="expense-info">
+                <strong>{expense.description}</strong>
+
+                <span>
+                  {expense.date} · {expense.category}
+                </span>
+              </div>
+
+              <span className="expense-type">
+                {expense.classification}
+              </span>
+
+              <strong>
+                R$ {expense.value.toFixed(2)}
+              </strong>
+
+              <button className="expense-action">
+                ⋮
+              </button>
             </div>
-
-            <span className="expense-type necessary">
-              Necessário
-            </span>
-
-            <strong>R$ 35,90</strong>
-
-            <button className="expense-action">
-              ⋮
-            </button>
-          </div>
-
-          <div className="expense">
-            <div className="expense-icon">🎬</div>
-
-            <div className="expense-info">
-              <strong>Cinema</strong>
-              <span>21 de setembro · Lazer</span>
-            </div>
-
-            <span className="expense-type avoidable">
-              Desnecessário
-            </span>
-
-            <strong>R$ 50,00</strong>
-
-            <button className="expense-action">
-              ⋮
-            </button>
-          </div>
-
-          <div className="expense">
-            <div className="expense-icon">🚗</div>
-
-            <div className="expense-info">
-              <strong>Uber</strong>
-              <span>20 de setembro · Transporte</span>
-            </div>
-
-            <span className="expense-type necessary">
-              Necessário
-            </span>
-
-            <strong>R$ 18,50</strong>
-
-            <button className="expense-action">
-              ⋮
-            </button>
-          </div>
-
-          <div className="expense">
-            <div className="expense-icon">💊</div>
-
-            <div className="expense-info">
-              <strong>Farmácia</strong>
-              <span>19 de setembro · Saúde</span>
-            </div>
-
-            <span className="expense-type unexpected">
-              Imprevisto
-            </span>
-
-            <strong>R$ 80,00</strong>
-
-            <button className="expense-action">
-              ⋮
-            </button>
-          </div>
-
-          <div className="expense">
-            <div className="expense-icon">🛒</div>
-
-            <div className="expense-info">
-              <strong>Supermercado</strong>
-              <span>18 de setembro · Alimentação</span>
-            </div>
-
-            <span className="expense-type necessary">
-              Necessário
-            </span>
-
-            <strong>R$ 114,50</strong>
-
-            <button className="expense-action">
-              ⋮
-            </button>
-          </div>
+          ))}
         </div>
       </section>
     </div>
