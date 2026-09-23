@@ -12,61 +12,167 @@ type Expense = {
 function Expenses() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [showForm, setShowForm] = useState(false)
-  
 
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
   const [value, setValue] = useState('')
   const [category, setCategory] = useState('')
   const [classification, setClassification] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [classificationFilter, setClassificationFilter] = useState('all')
+  const [periodFilter, setPeriodFilter] = useState('month')
+
+  function formatCategory(category: string) {
+    const categories: Record<string, string> = {
+      ALIMENTACAO: 'Alimentação',
+      TRANSPORTE: 'Transporte',
+      MORADIA: 'Moradia',
+      LAZER: 'Lazer',
+      SAUDE: 'Saúde',
+      EDUCACAO: 'Educação',
+      OUTROS: 'Outros',
+    }
+
+    return categories[category] ?? category
+  }
+
+  function formatClassification(classification: string) {
+    const classifications: Record<string, string> = {
+      NECESSARIO: 'Necessário',
+      IMPREVISTO: 'Imprevisto',
+      DESNECESSARIO: 'Desnecessário',
+    }
+
+    return classifications[classification] ?? classification
+  }
+
+  function formatDate(date: string) {
+    return new Date(`${date}T00:00:00`).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+    })
+  }
 
   const total = expenses.reduce((sum, expense) => sum + expense.value, 0)
 
+  function getPeriodDates() {
+    const today = new Date()
+
+    if (periodFilter === 'all') {
+      return {
+        startDate: null,
+        endDate: null,
+      }
+    }
+
+    if (periodFilter === 'previous') {
+      const previousMonth = new Date(
+        today.getFullYear(),
+        today.getMonth() - 1,
+        1
+      )
+
+      const lastDayPreviousMonth = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        0
+      )
+
+      return {
+        startDate: previousMonth.toISOString().split('T')[0],
+        endDate: lastDayPreviousMonth.toISOString().split('T')[0],
+      }
+    }
+
+    const firstDayCurrentMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    )
+
+    const lastDayCurrentMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0
+    )
+
+    return {
+      startDate: firstDayCurrentMonth.toISOString().split('T')[0],
+      endDate: lastDayCurrentMonth.toISOString().split('T')[0],
+    }
+  }
+
+  async function loadExpenses() {
+    const params = new URLSearchParams()
+
+    const { startDate, endDate } = getPeriodDates()
+
+    if (startDate) {
+      params.append('startDate', startDate)
+    }
+
+    if (endDate) {
+      params.append('endDate', endDate)
+    }
+
+    if (categoryFilter !== 'all') {
+      params.append('category', categoryFilter)
+    }
+
+    if (classificationFilter !== 'all') {
+      params.append('classification', classificationFilter)
+    }
+
+    const response = await fetch(
+      `http://localhost:8080/api/expenses?${params.toString()}`
+    )
+
+    const data = await response.json()
+
+    console.log('Despesas recebidas:', data)
+
+    setExpenses(data)
+  }
+
   useEffect(() => {
-  fetch('http://localhost:8080/api/expenses')
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('Despesas recebidas:', data)
-      setExpenses(data)
-    })
-}, [])
+    loadExpenses()
+  }, [periodFilter, categoryFilter, classificationFilter])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
     const expense = {
-        date,
-        description,
-        value: Number(value),
-        category,
-        classification,
+      date,
+      description,
+      value: Number(value),
+      category,
+      classification,
     }
 
     const response = await fetch('http://localhost:8080/api/expenses', {
-        method: 'POST',
-        headers: {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(expense),
+      },
+      body: JSON.stringify(expense),
     })
 
     if (!response.ok) {
-        console.error('Erro ao cadastrar despesa')
-        return
+      console.error('Erro ao cadastrar despesa')
+      return
     }
 
     const savedExpense = await response.json()
 
     console.log('Despesa salva:', savedExpense)
 
-        setExpenses((currentExpenses) => [
+    setExpenses((currentExpenses) => [
       ...currentExpenses,
       savedExpense,
     ])
 
-
     setShowForm(false)
-    }
+  }
 
   return (
     <div>
@@ -184,7 +290,7 @@ function Expenses() {
         <div className="expense-filters">
           <div className="filter-group">
             <label>Período</label>
-            <select defaultValue="month">
+            <select  value={periodFilter} onChange={(event) => setPeriodFilter(event.target.value)}>
               <option value="month">Este mês</option>
               <option value="previous">Mês anterior</option>
               <option value="all">Todo o período</option>
@@ -193,25 +299,25 @@ function Expenses() {
 
           <div className="filter-group">
             <label>Categoria</label>
-            <select defaultValue="all">
+            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
               <option value="all">Todas</option>
-              <option value="food">Alimentação</option>
-              <option value="transport">Transporte</option>
-              <option value="housing">Moradia</option>
-              <option value="leisure">Lazer</option>
-              <option value="health">Saúde</option>
-              <option value="education">Educação</option>
-              <option value="other">Outros</option>
+              <option value="ALIMENTACAO">Alimentação</option>
+              <option value="TRANSPORTE">Transporte</option>
+              <option value="MORADIA">Moradia</option>
+              <option value="LAZER">Lazer</option>
+              <option value="SAUDE">Saúde</option>
+              <option value="EDUCACAO">Educação</option>
+              <option value="OUTROS">Outros</option>
             </select>
           </div>
 
           <div className="filter-group">
             <label>Tipo de gasto</label>
-            <select defaultValue="all">
+            <select  value={classificationFilter} onChange={(event) => setClassificationFilter(event.target.value)}>
               <option value="all">Todos</option>
-              <option value="necessary">Necessários</option>
-              <option value="unexpected">Imprevistos</option>
-              <option value="avoidable">Desnecessários</option>
+              <option value="NECESSARIO">Necessários</option>
+              <option value="IMPREVISTO">Imprevistos</option>
+              <option value="DESNECESSARIO">Desnecessários</option>
             </select>
           </div>
         </div>
@@ -225,7 +331,10 @@ function Expenses() {
           </div>
 
           <strong className="month-total">
-            {total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}
+            {total.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            })}
           </strong>
         </div>
 
@@ -240,16 +349,19 @@ function Expenses() {
                 <strong>{expense.description}</strong>
 
                 <span>
-                  {expense.date} · {expense.category}
+                  {formatDate(expense.date)} · {formatCategory(expense.category)}
                 </span>
               </div>
 
               <span className="expense-type">
-                {expense.classification}
+                {formatClassification(expense.classification)}
               </span>
 
               <strong>
-                R$ {expense.value.toFixed(2)}
+                {expense.value.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
               </strong>
 
               <button className="expense-action">
