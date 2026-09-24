@@ -12,6 +12,7 @@ type Expense = {
 function Expenses() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [showForm, setShowForm] = useState(false)
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
 
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
@@ -149,8 +150,14 @@ function Expenses() {
       classification,
     }
 
-    const response = await fetch('http://localhost:8080/api/expenses', {
-      method: 'POST',
+    const url = editingExpense
+      ? `http://localhost:8080/api/expenses/${editingExpense.id}`
+      : 'http://localhost:8080/api/expenses'
+
+    const method = editingExpense ? 'PUT' : 'POST'
+
+    const response = await fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -158,20 +165,59 @@ function Expenses() {
     })
 
     if (!response.ok) {
-      console.error('Erro ao cadastrar despesa')
+      console.error('Erro ao salvar despesa')
       return
     }
 
     const savedExpense = await response.json()
 
-    console.log('Despesa salva:', savedExpense)
+    if (editingExpense) {
+      setExpenses((currentExpenses) =>
+        currentExpenses.map((currentExpense) =>
+          currentExpense.id === savedExpense.id
+            ? savedExpense
+            : currentExpense
+        )
+      )
+    } else {
+      setExpenses((currentExpenses) => [
+        ...currentExpenses,
+        savedExpense,
+      ])
+    }
 
-    setExpenses((currentExpenses) => [
-      ...currentExpenses,
-      savedExpense,
-    ])
-
+    setEditingExpense(null)
     setShowForm(false)
+  }
+
+  async function handleDelete(id: number) {
+    const response = await fetch(
+      `http://localhost:8080/api/expenses/${id}`,
+      {
+        method: 'DELETE',
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Erro ao excluir despesa')
+      return
+    }
+
+    setExpenses((currentExpenses) =>
+      currentExpenses.filter((expense) => expense.id !== id)
+    )
+  }
+
+  function handleEdit(expense: Expense) {
+    setEditingExpense(expense)
+
+    setDate(expense.date)
+    setDescription(expense.description)
+    setValue(expense.value.toString())
+    setCategory(expense.category)
+    setClassification(expense.classification)
+
+    setShowForm(true)
   }
 
   return (
@@ -197,7 +243,7 @@ function Expenses() {
         <section className="panel expense-form-panel">
           <div className="panel-header">
             <div>
-              <h2>Nova despesa</h2>
+              <h2>{editingExpense ? 'Editar despesa' : 'Nova despesa'}</h2>
               <p>Informe os dados do seu gasto.</p>
             </div>
           </div>
@@ -273,13 +319,16 @@ function Expenses() {
               <button
                 type="button"
                 className="cancel-button"
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                  setShowForm(false) 
+                  setEditingExpense(null)
+                }}
               >
                 Cancelar
               </button>
 
               <button type="submit" className="add-button">
-                Salvar despesa
+                {editingExpense ? 'Salvar alterações' : 'Salvar despesa'}
               </button>
             </div>
           </form>
@@ -364,9 +413,21 @@ function Expenses() {
                 })}
               </strong>
 
-              <button className="expense-action">
-                ⋮
-              </button>
+              <div className="expense-actions">
+                <button
+                  className="expense-action edit"
+                  onClick={() => handleEdit(expense)}
+                >
+                  Editar
+                </button>
+
+                <button
+                  className="expense-action delete"
+                  onClick={() => handleDelete(expense.id)}
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
           ))}
         </div>
