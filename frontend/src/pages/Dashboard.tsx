@@ -1,4 +1,177 @@
+import { useEffect, useState } from 'react'
+
+type MonthlyReport = {
+  year: number
+  month: number
+  total: number
+  necessary: number
+  unexpected: number
+  unnecessary: number
+  byCategory: Record<string, number>
+}
+
+type Expense = {
+  id: number
+  date: string
+  description: string
+  value: number
+  category: string
+  classification: string
+}
+
 function Dashboard() {
+  const [report, setReport] = useState<MonthlyReport | null>(null)
+  const [expenses, setExpenses] = useState<Expense[]>([])
+
+  useEffect(() => {
+    async function loadReport() {
+      const today = new Date()
+
+      const year = today.getFullYear()
+      const month = today.getMonth() + 1
+
+      const response = await fetch(
+        `http://localhost:8080/api/reports/monthly?year=${year}&month=${month}`
+      )
+
+      if (!response.ok) {
+        console.error('Erro ao carregar relatório mensal')
+        return
+      }
+
+      const data = await response.json()
+
+      console.log('Relatório recebido:', data)
+
+      setReport(data)
+    }
+
+    async function loadExpenses() {
+      const response = await fetch(
+        'http://localhost:8080/api/expenses'
+      )
+
+      if (!response.ok) {
+        console.error('Erro ao carregar despesas')
+        return
+      }
+
+      const data = await response.json()
+
+      setExpenses(data)
+    }
+
+    loadReport()
+    loadExpenses()
+  }, [])
+
+  function formatCurrency(value: number) {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+  }
+
+  function formatCategory(category: string) {
+    const categories: Record<string, string> = {
+      ALIMENTACAO: 'Alimentação',
+      TRANSPORTE: 'Transporte',
+      MORADIA: 'Moradia',
+      LAZER: 'Lazer',
+      SAUDE: 'Saúde',
+      EDUCACAO: 'Educação',
+      OUTROS: 'Outros',
+    }
+
+    return categories[category] ?? category
+  }
+
+  function formatClassification(classification: string) {
+    const classifications: Record<string, string> = {
+      NECESSARIO: 'Necessário',
+      IMPREVISTO: 'Imprevisto',
+      DESNECESSARIO: 'Desnecessário',
+    }
+
+    return classifications[classification] ?? classification
+  }
+
+  function calculatePercentage(value: number) {
+    if (!report || report.total === 0) {
+      return 0
+    }
+
+    return Math.round((value / report.total) * 100)
+  }
+
+  function formatMonth(month: number) {
+    const months = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ]
+
+    return months[month - 1]
+  }
+
+  if (!report) {
+    return <p>Carregando dashboard...</p>
+  }
+
+  function getDailyExpenses() {
+   const dailyExpenses: Record<number, number> = {}
+
+    expenses.forEach((expense) => {
+      const day = Number(expense.date.split('-')[2])
+
+      dailyExpenses[day] =
+        (dailyExpenses[day] ?? 0) + expense.value
+    })
+
+    return dailyExpenses
+  }
+
+  const dailyExpenses = getDailyExpenses()
+
+  const daysInMonth = new Date(
+    report.year,
+    report.month,
+    0
+  ).getDate()
+
+  const chartValues = Array.from(
+    { length: daysInMonth },
+    (_, index) => {
+      const day = index + 1
+
+      return {
+        day,
+        value: dailyExpenses[day] ?? 0,
+      }
+    }
+  )
+
+  const maxChartValue = Math.max(
+    ...chartValues.map((item) => item.value),
+    1
+  )
+
+  const latestExpenses = [...expenses]
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+    .slice(0, 3)
+
   return (
     <div>
       <header className="header">
@@ -18,26 +191,34 @@ function Dashboard() {
       <section className="summary-grid">
         <div className="summary-card">
           <span className="card-label">Gastos este mês</span>
-          <strong>R$ 1.250,00</strong>
-          <span className="card-description">Setembro 2026</span>
+          <strong>{formatCurrency(report.total)}</strong>
+          <span className="card-description">
+            {formatMonth(report.month)} {report.year}
+          </span>
         </div>
 
         <div className="summary-card">
           <span className="card-label">Necessários</span>
-          <strong>R$ 800,00</strong>
-          <span className="card-description">64% dos gastos</span>
+          <strong>{formatCurrency(report.necessary)}</strong>
+          <span className="card-description">
+            {calculatePercentage(report.necessary)}% dos gastos
+          </span>
         </div>
 
         <div className="summary-card">
           <span className="card-label">Imprevistos</span>
-          <strong>R$ 200,00</strong>
-          <span className="card-description">16% dos gastos</span>
+          <strong>{formatCurrency(report.unexpected)}</strong>
+          <span className="card-description">
+            {calculatePercentage(report.unexpected)}% dos gastos
+          </span>
         </div>
 
         <div className="summary-card">
           <span className="card-label">Desnecessários</span>
-          <strong>R$ 250,00</strong>
-          <span className="card-description">20% dos gastos</span>
+          <strong>{formatCurrency(report.unnecessary)}</strong>
+          <span className="card-description">
+            {calculatePercentage(report.unnecessary)}% dos gastos
+          </span>
         </div>
       </section>
 
@@ -71,42 +252,26 @@ function Dashboard() {
               <div className="line"></div>
             </div>
 
-            <div className="bars">
-              <div className="bar-container">
-                <div className="bar" style={{ height: '45%' }}></div>
-                <span>01</span>
-              </div>
+           <div className="bars">
+            {chartValues.map((item) => {
+              const height =
+                item.value === 0
+                  ? 0
+                  : (item.value / maxChartValue) * 100
 
-              <div className="bar-container">
-                <div className="bar" style={{ height: '65%' }}></div>
-                <span>05</span>
-              </div>
+              return (
+                <div className="bar-container" key={item.day}>
+                  <div
+                    className="bar"
+                    style={{ height: `${height}%` }}
+                    title={formatCurrency(item.value)}
+                  ></div>
 
-              <div className="bar-container">
-                <div className="bar" style={{ height: '35%' }}></div>
-                <span>10</span>
-              </div>
-
-              <div className="bar-container">
-                <div className="bar" style={{ height: '80%' }}></div>
-                <span>15</span>
-              </div>
-
-              <div className="bar-container">
-                <div className="bar" style={{ height: '55%' }}></div>
-                <span>20</span>
-              </div>
-
-              <div className="bar-container">
-                <div className="bar" style={{ height: '70%' }}></div>
-                <span>25</span>
-              </div>
-
-              <div className="bar-container">
-                <div className="bar" style={{ height: '90%' }}></div>
-                <span>30</span>
-              </div>
-            </div>
+                  <span>{String(item.day).padStart(2, '0')}</span>
+                </div>
+              )
+            })}
+          </div>
           </div>
         </div>
 
@@ -119,60 +284,17 @@ function Dashboard() {
           </div>
 
           <div className="category-list">
-            <div className="category">
-              <div className="category-info">
-                <div>
-                  <strong>Alimentação</strong>
-                  <small>8 despesas</small>
+            {Object.entries(report.byCategory).map(([category, value]) => (
+              <div className="category" key={category}>
+                <div className="category-info">
+                  <div>
+                    <strong>{formatCategory(category)}</strong>
+                  </div>
                 </div>
+
+                <strong>{formatCurrency(value)}</strong>
               </div>
-
-              <strong>R$ 450,00</strong>
-            </div>
-
-            <div className="category">
-              <div className="category-info">
-                <div>
-                  <strong>Transporte</strong>
-                  <small>5 despesas</small>
-                </div>
-              </div>
-
-              <strong>R$ 180,00</strong>
-            </div>
-
-            <div className="category">
-              <div className="category-info">
-                <div>
-                  <strong>Moradia</strong>
-                  <small>2 despesas</small>
-                </div>
-              </div>
-
-              <strong>R$ 300,00</strong>
-            </div>
-
-            <div className="category">
-              <div className="category-info">
-                <div>
-                  <strong>Lazer</strong>
-                  <small>4 despesas</small>
-                </div>
-              </div>
-
-              <strong>R$ 120,00</strong>
-            </div>
-
-            <div className="category">
-              <div className="category-info">
-                <div>
-                  <strong>Saúde</strong>
-                  <small>2 despesas</small>
-                </div>
-              </div>
-
-              <strong>R$ 80,00</strong>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -190,35 +312,19 @@ function Dashboard() {
         </div>
 
         <div className="expense-list">
-          <div className="expense">
+          {latestExpenses.map((expense) => (
+            <div className="expense" key={expense.id}>
+              <div className="expense-info">
+                <strong>{expense.description}</strong>
+                <span>
+                  {formatCategory(expense.category)} ·{' '}
+                  {formatClassification(expense.classification)}
+                </span>
+              </div>
 
-            <div className="expense-info">
-              <strong>Almoço</strong>
-              <span>Alimentação · Necessário</span>
+              <strong>{formatCurrency(expense.value)}</strong>
             </div>
-
-            <strong>R$ 35,90</strong>
-          </div>
-
-          <div className="expense">
-
-            <div className="expense-info">
-              <strong>Cinema</strong>
-              <span>Lazer · Evitável</span>
-            </div>
-
-            <strong>R$ 50,00</strong>
-          </div>
-
-          <div className="expense">
-
-            <div className="expense-info">
-              <strong>Uber</strong>
-              <span>Transporte · Necessário</span>
-            </div>
-
-            <strong>R$ 18,50</strong>
-          </div>
+          ))}
         </div>
       </section>
     </div>
