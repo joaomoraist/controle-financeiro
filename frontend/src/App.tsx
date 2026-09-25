@@ -6,6 +6,18 @@ import './App.css'
 function App() {
   const [page, setPage] = useState('dashboard')
 
+  function handleExportExcel() {
+    const today = new Date()
+
+    const year = today.getFullYear()
+    const month = today.getMonth() + 1
+
+    window.open(
+      `http://localhost:8080/api/reports/monthly/export?year=${year}&month=${month}`,
+      '_blank'
+    )
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -53,9 +65,33 @@ function App() {
         {page === 'expenses' && <Expenses />}
 
         {page === 'reports' && (
-          <div>
-            <h1>Relatórios</h1>
-            <p>Em breve...</p>
+          <div className="reports-page">
+            <header className="header">
+              <div>
+                <p className="greeting">Relatórios</p>
+                <h1>Exportar dados</h1>
+                <p className="subtitle">
+                  Exporte suas despesas do mês para Excel.
+                </p>
+              </div>
+            </header>
+
+            <section className="panel reports-panel">
+              <div>
+                <h2>Relatório mensal</h2>
+                <p>
+                  Gere um arquivo Excel com as despesas e o resumo
+                  financeiro do mês atual.
+                </p>
+              </div>
+
+              <button
+                className="add-button"
+                onClick={handleExportExcel}
+              >
+                Exportar para Excel
+              </button>
+            </section>
           </div>
         )}
       </main>

@@ -22,48 +22,90 @@ type Expense = {
 function Dashboard() {
   const [report, setReport] = useState<MonthlyReport | null>(null)
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [periodFilter, setPeriodFilter] = useState ("current")
+
+  function getSelectedPeriod() {
+    const today = new Date()
+
+    if (periodFilter === 'previous') {
+      const date = new Date(
+        today.getFullYear(),
+        today.getMonth() - 1,
+        1
+      )
+
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+
+      const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+
+      const lastDay = new Date(year, month, 0).getDate()
+
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+
+      return {
+        year,
+        month,
+        startDate,
+        endDate,
+      }
+    }
+
+    const year = today.getFullYear()
+    const month = today.getMonth() + 1
+
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+
+    const lastDay = new Date(year, month, 0).getDate()
+
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+
+    return {
+      year,
+      month,
+      startDate,
+      endDate,
+    }
+  }
 
   useEffect(() => {
-    async function loadReport() {
-      const today = new Date()
+    async function loadDashboard() {
+      const {
+        year,
+        month,
+        startDate,
+        endDate,
+      } = getSelectedPeriod()
 
-      const year = today.getFullYear()
-      const month = today.getMonth() + 1
-
-      const response = await fetch(
+      const reportResponse = await fetch(
         `http://localhost:8080/api/reports/monthly?year=${year}&month=${month}`
       )
 
-      if (!response.ok) {
+      if (!reportResponse.ok) {
         console.error('Erro ao carregar relatório mensal')
         return
       }
 
-      const data = await response.json()
+      const reportData = await reportResponse.json()
 
-      console.log('Relatório recebido:', data)
+      setReport(reportData)
 
-      setReport(data)
-    }
-
-    async function loadExpenses() {
-      const response = await fetch(
-        'http://localhost:8080/api/expenses'
+      const expensesResponse = await fetch(
+        `http://localhost:8080/api/expenses?startDate=${startDate}&endDate=${endDate}`
       )
 
-      if (!response.ok) {
+      if (!expensesResponse.ok) {
         console.error('Erro ao carregar despesas')
         return
       }
 
-      const data = await response.json()
+      const expensesData = await expensesResponse.json()
 
-      setExpenses(data)
+      setExpenses(expensesData)
     }
 
-    loadReport()
-    loadExpenses()
-  }, [])
+    loadDashboard()
+  }, [periodFilter])
 
   function formatCurrency(value: number) {
     return value.toLocaleString('pt-BR', {
@@ -165,6 +207,14 @@ function Dashboard() {
     1
   )
 
+  const chartStep = Math.ceil(maxChartValue / 3)
+
+  const chartLabels = [
+    chartStep * 3,
+    chartStep * 2,
+    chartStep,
+  ]
+
   const latestExpenses = [...expenses]
     .sort(
       (a, b) =>
@@ -230,27 +280,19 @@ function Dashboard() {
               <p>Veja como suas despesas estão distribuídas.</p>
             </div>
 
-            <select defaultValue="month">
-              <option value="month">Este mês</option>
+            <select value={periodFilter} onChange={(event) => setPeriodFilter(event.target.value)}>
+              <option value="current">Este mês</option>
               <option value="previous">Mês anterior</option>
             </select>
           </div>
 
           <div className="chart">
-            <div className="chart-line">
-              <span>R$ 600</span>
-              <div className="line"></div>
-            </div>
-
-            <div className="chart-line">
-              <span>R$ 400</span>
-              <div className="line"></div>
-            </div>
-
-            <div className="chart-line">
-              <span>R$ 200</span>
-              <div className="line"></div>
-            </div>
+            {chartLabels.map((label) => (
+              <div className="chart-line" key={label}>
+                <span>{formatCurrency(label)}</span>
+                <div className="line"></div>
+              </div>
+            ))}
 
            <div className="bars">
             {chartValues.map((item) => {
