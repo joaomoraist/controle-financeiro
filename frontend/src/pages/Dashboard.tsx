@@ -232,10 +232,6 @@ function Dashboard() {
             Aqui está um resumo das suas despesas.
           </p>
         </div>
-
-        <button className="add-button">
-          + Nova despesa
-        </button>
       </header>
 
       <section className="summary-grid">
@@ -306,7 +302,7 @@ function Dashboard() {
                   <div
                     className="bar"
                     style={{ height: `${height}%` }}
-                    title={formatCurrency(item.value)}
+                    data-value={formatCurrency(item.value)}
                   ></div>
 
                   <span>{String(item.day).padStart(2, '0')}</span>
@@ -347,10 +343,6 @@ function Dashboard() {
             <h2>Últimas despesas</h2>
             <p>Confira seus gastos mais recentes.</p>
           </div>
-
-          <button className="link-button">
-            Ver todas
-          </button>
         </div>
 
         <div className="expense-list">

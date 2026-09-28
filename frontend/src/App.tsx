@@ -23,7 +23,7 @@ function App() {
       <aside className="sidebar">
         <div className="logo">
           <div className="logo-icon">C</div>
-          <span>Controle</span>
+          <span>Controle Financeiro</span>
         </div>
 
         <nav className="menu">
@@ -51,17 +51,10 @@ function App() {
             Relatórios
           </button>
         </nav>
-
-        <div className="sidebar-bottom">
-          <button className="menu-item">
-            <span>⚙</span>
-            Configurações
-          </button>
-        </div>
       </aside>
 
       <main className="main">
-        {page === 'dashboard' && <Dashboard />}
+        {page === 'dashboard' && <Dashboard/>}
         {page === 'expenses' && <Expenses />}
 
         {page === 'reports' && (
