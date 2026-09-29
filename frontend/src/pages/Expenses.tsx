@@ -220,6 +220,32 @@ function Expenses() {
     setShowForm(true)
   }
 
+  function getPeriodTitle() {
+    const today = new Date()
+
+    if (periodFilter === 'previous') {
+      const date = new Date(
+        today.getFullYear(),
+        today.getMonth() - 1,
+        1
+      )
+
+      return date.toLocaleDateString('pt-BR', {
+        month: 'long',
+        year: 'numeric'
+      })
+    }
+
+    if (periodFilter === 'all') {
+      return 'Todo o período'
+    }
+
+    return today.toLocaleDateString('pt-BR', {
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
   return (
     <div>
       <header className="header">
@@ -375,7 +401,7 @@ function Expenses() {
       <section className="panel expenses-table-panel">
         <div className="panel-header">
           <div>
-            <h2>Setembro 2026</h2>
+            <h2>{getPeriodTitle()}</h2>
             <p>{expenses.length} despesas encontradas</p>
           </div>
 

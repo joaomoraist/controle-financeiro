@@ -1,7 +1,6 @@
 package com.joaomorais.controle_financeiro.service;
 
 import org.springframework.stereotype.Service;
-import com.joaomorais.controle_financeiro.controller.ReportController;
 import com.joaomorais.controle_financeiro.dto.MonthlyReportResponse;
 import com.joaomorais.controle_financeiro.entity.Expense;
 import com.joaomorais.controle_financeiro.exception.InvalidReportPeriodException;
@@ -65,7 +64,7 @@ public class ReportService {
           byCategory.put(category, byCategory.getOrDefault(category, BigDecimal.ZERO)
                   .add(expense.getValue()));
         }
-        return new MonthlyReportResponse(year, month, total, necessary, unnecessary, unexpected, byCategory);
+        return new MonthlyReportResponse(year, month, total, necessary, unexpected, unnecessary, byCategory);
     }
 
 }
