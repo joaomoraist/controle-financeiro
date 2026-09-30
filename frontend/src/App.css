@@ -997,3 +997,47 @@
 .expense > strong {
   margin-left: 20px;
 }
+
+.ai-panel {
+  margin-bottom: 24px;
+}
+
+.ai-panel .panel-header {
+  align-items: center;
+}
+
+.ai-button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: #20201d;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ai-button:hover {
+  opacity: 0.85;
+}
+
+.ai-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ai-content {
+  margin: 0 24px 24px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  background: #f7f7f5;
+  border: 1px solid #e8e8e4;
+}
+
+.ai-content p {
+  margin: 0;
+  color: #44433f;
+  font-size: 14px;
+  line-height: 1.6;
+}

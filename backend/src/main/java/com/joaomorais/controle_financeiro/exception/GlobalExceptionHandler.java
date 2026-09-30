@@ -19,4 +19,10 @@ public class GlobalExceptionHandler {
     public String handleInvalidReportPeriod(InvalidReportPeriodException exception){
         return exception.getMessage();
     }
+
+    @ExceptionHandler(AiNotConfiguredException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public String handleAiNotConfigured(AiNotConfiguredException exception) {
+        return exception.getMessage();
+    }
 }

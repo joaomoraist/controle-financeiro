@@ -24,6 +24,10 @@ function Dashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [periodFilter, setPeriodFilter] = useState ("current")
 
+  const [aiTip, setAiTip] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+
   function getSelectedPeriod() {
     const today = new Date()
 
@@ -68,7 +72,39 @@ function Dashboard() {
     }
   }
 
+  async function loadAiTip() {
+      const { year, month } = getSelectedPeriod()
+
+      setAiLoading(true)
+      setAiTip('')
+      setAiError('')
+
+      try {
+        const aiResponse = await fetch(
+          `http://localhost:8080/api/ai/tip?year=${year}&month=${month}`
+        )
+
+        if (!aiResponse.ok) {
+          const errorMessage = await aiResponse.text()
+          throw new Error(errorMessage)
+        }
+
+        const aiData = await aiResponse.text()
+
+        setAiTip(aiData)
+      } catch (error) {
+        if (error instanceof Error) {
+          setAiError(error.message)
+        } else {
+          setAiError('Não foi possível carregar a dica financeira.')
+        }
+      } finally {
+        setAiLoading(false)
+      }
+    }
+
   useEffect(() => {
+    
     async function loadDashboard() {
       const {
         year,
@@ -268,6 +304,35 @@ function Dashboard() {
         </div>
       </section>
 
+      <section className="panel ai-panel">
+        <div className="panel-header">
+          <div>
+            <h2>Dica da IA</h2>
+            <p>Receba uma sugestão baseada nos seus gastos.</p>
+          </div>
+
+          <button
+            className="ai-button"
+            onClick={loadAiTip}
+            disabled={aiLoading}
+          >
+            {aiLoading ? 'Analisando...' : 'Dica da IA'}
+          </button>
+        </div>
+
+        {aiTip && (
+          <div className="ai-content">
+            <p>{aiTip}</p>
+          </div>
+        )}
+
+        {aiError && (
+          <div className="ai-content">
+            <p>{aiError}</p>
+          </div>
+        )}
+      </section>
+      
       <section className="dashboard-grid">
         <div className="panel spending-panel">
           <div className="panel-header">
