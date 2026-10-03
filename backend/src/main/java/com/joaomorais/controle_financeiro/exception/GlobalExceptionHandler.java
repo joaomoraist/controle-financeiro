@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.google.genai.errors.ServerException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -24,5 +25,11 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public String handleAiNotConfigured(AiNotConfiguredException exception) {
         return exception.getMessage();
+    }
+
+    @ExceptionHandler(ServerException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public String handleGeminiServerException(ServerException exception) {
+        return "A IA está temporariamente indisponível. Tente novamente em alguns instantes.";
     }
 }
